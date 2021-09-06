@@ -19,6 +19,9 @@ class SequelizeDb {
     if (config.get('backendDatabaseUri')) {
       sequelize = new Sequelize(config.get('backendDatabaseUri'), {
         logging,
+        dialectOptions: {
+          multipleStatements: true,
+        },
       });
     } else {
       sequelize = new Sequelize({
