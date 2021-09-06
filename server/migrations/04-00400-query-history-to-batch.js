@@ -20,18 +20,18 @@ async function up(queryInterface, config, appLog, sequelizeDb) {
 
   await sequelizeDb.query(
     `
-      CREATE VIEW vw_query_history AS 
-        WITH statement_summary AS (
-          SELECT 
-            batch_id, 
-            SUM(row_count) AS row_count, 
-            MAX(CAST(incomplete AS ${castType})) AS incomplete
-          FROM 
-            statements
-          GROUP BY 
-            batch_id
-        )
-        SELECT 
+			CREATE VIEW statement_summary AS (
+				SELECT
+					batch_id,
+					SUM(row_count) AS row_count,
+					MAX(CAST(incomplete AS ${castType})) AS incomplete
+				FROM
+					statements
+				GROUP BY
+					batch_id
+			);
+      CREATE VIEW vw_query_history AS
+        SELECT
           b.id,
           b.query_id,
           b.name AS query_name,
@@ -46,11 +46,12 @@ async function up(queryInterface, config, appLog, sequelizeDb) {
           u.email AS user_email,
           ss.row_count,
           ss.incomplete
-        FROM 
+        FROM
           batches b
           LEFT JOIN users u ON b.user_id = u.id
           LEFT JOIN connections c ON b.connection_id = c.id
-          LEFT JOIN statement_summary ss ON b.id = ss.batch_id
+          LEFT JOIN statement_summary ss ON b.id = ss.batch_id;
+			DROP VIEW statement_summary;
     `,
     {
       type: Sequelize.QueryTypes.RAW,
